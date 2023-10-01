@@ -3,6 +3,9 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
 using RoR2;
+using R2API;
+using System.Collections.Generic;
+using System.Collections;
 
 namespace HappiestMaskRework
 {
@@ -22,7 +25,9 @@ namespace HappiestMaskRework
         public const string PluginGUID = PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "OakPrime";
         public const string PluginName = "HappiestMaskRework";
-        public const string PluginVersion = "0.1.0";
+        public const string PluginVersion = "1.0.0";
+
+        private readonly Dictionary<string, string> DefaultLanguage = new Dictionary<string, string>();
 
         //The Awake() method is run at the very start when the game is initialized.
         public void Awake()
@@ -93,12 +98,26 @@ namespace HappiestMaskRework
                     {
                         damageReport.attacker.GetComponent<HappiestMaskBehavior>().ghosts.Add(ghostBody);
                     });
+                    this.UpdateText();
                 };
             }
             catch (Exception e)
             {
                 Logger.LogError(e.Message + " - " + e.StackTrace);
-            };
+            }
+        }
+        private void UpdateText()
+        {
+            this.ReplaceString("ITEM_GHOSTONKILL_DESC", "Killing an enemy will spawn a ghost of the killed enemy with <style=cIsDamage>1500%</style> damage for <style=cIsDamage>30s</style>. "
+            + "You can have <style=cIsDamage>1</style> <style=cStack>(+1 per stack)</style> ghosts at a time.");
+            this.ReplaceString("ITEM_GHOSTONKILL_PICKUP", "Killing an enemy spawns a ghost of them.");
+        }
+
+
+        private void ReplaceString(string token, string newText)
+        {
+            this.DefaultLanguage[token] = Language.GetString(token);
+            LanguageAPI.Add(token, newText);
         }
 
         /*void NewPreSpawnSetup(CharacterMaster master)
