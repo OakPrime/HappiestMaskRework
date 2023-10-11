@@ -5,7 +5,6 @@ using System;
 using RoR2;
 using R2API;
 using System.Collections.Generic;
-using System.Collections;
 
 namespace HappiestMaskRework
 {
@@ -25,7 +24,7 @@ namespace HappiestMaskRework
         public const string PluginGUID = PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "OakPrime";
         public const string PluginName = "HappiestMaskRework";
-        public const string PluginVersion = "1.0.0";
+        public const string PluginVersion = "1.0.1";
 
         private readonly Dictionary<string, string> DefaultLanguage = new Dictionary<string, string>();
 
