@@ -5,14 +5,24 @@ namespace HappiestMaskRework
 {
     internal class HappiestMaskBehavior : CharacterBody.ItemBehavior
     {
-        public List<CharacterBody> ghosts = new List<CharacterBody>();
+        private CharacterBody _ghost;
 
         private void OnDisable()
         {
-            for (int i = 0; i < ghosts.Count; i++)
+            if ((bool) (UnityEngine.Object)_ghost && _ghost.healthComponent != null)
             {
-                ghosts[i].healthComponent.health = 0.0f;
+                _ghost.healthComponent.health = 0.0f;
             }
+        }
+
+        public bool HasGhost()
+        {
+            return (bool)(UnityEngine.Object)_ghost;
+        }
+
+        public void SetGhost(CharacterBody newGhost)
+        {
+            _ghost = newGhost;
         }
     }
 }

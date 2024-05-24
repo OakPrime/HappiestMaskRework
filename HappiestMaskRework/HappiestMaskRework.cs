@@ -5,6 +5,8 @@ using System;
 using RoR2;
 using R2API;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace HappiestMaskRework
 {
@@ -24,7 +26,7 @@ namespace HappiestMaskRework
         public const string PluginGUID = PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "OakPrime";
         public const string PluginName = "HappiestMaskRework";
-        public const string PluginVersion = "1.0.1";
+        public const string PluginVersion = "1.1.0";
 
         private readonly Dictionary<string, string> DefaultLanguage = new Dictionary<string, string>();
 
@@ -34,20 +36,12 @@ namespace HappiestMaskRework
             Log.Init(Logger);
             try
             {
-                /*IL.RoR2.Util.TryToCreateGhost += (il) =>
+                RoR2Application.onLoad += () =>
                 {
-                    ILCursor c = new ILCursor(il);
-                    c.TryGotoNext(
-                        x => x.MatchCallOrCallvirt(out _),
-                        x => x.MatchStloc(out _),
-                        x => x.MatchLdloc(out _)
-                    );
-                    c.Emit(OpCodes.Dup);
-                    c.EmitDelegate<Action<RoR2.MasterSummon>>((masterSumm) =>
-                    {
-                        masterSumm.preSpawnSetupCallback += new Action<CharacterMaster>(NewPreSpawnSetup);
-                    });
-                };*/
+                    var list = RoR2Content.Items.GhostOnKill.tags.ToList();
+                    list.Add(ItemTag.CannotCopy);
+                    RoR2Content.Items.GhostOnKill.tags = list.ToArray();
+                };
                 IL.RoR2.CharacterBody.OnInventoryChanged += (il) =>
                 {
                     ILCursor c = new ILCursor(il);
@@ -73,18 +67,7 @@ namespace HappiestMaskRework
                     c.EmitDelegate<Func<DamageReport, bool>>((damageReport) =>
                     {
                         HappiestMaskBehavior maskBehavior = damageReport.attacker.GetComponent<HappiestMaskBehavior>();
-                        if (maskBehavior == null)
-                        {
-                            return false;
-                        }
-                        for (int i = 0; i < maskBehavior.ghosts.Count; i++)
-                        {
-                            if (!(bool)(UnityEngine.Object)maskBehavior.ghosts[i])
-                            {
-                                maskBehavior.ghosts.RemoveAt(i);
-                            }
-                        }
-                        return maskBehavior.ghosts.Count < damageReport.attackerMaster.inventory.GetItemCount(RoR2Content.Items.GhostOnKill);
+                        return maskBehavior != null && !maskBehavior.HasGhost();
                     });
                     c.Index += 3;
                     c.Remove();
@@ -95,10 +78,14 @@ namespace HappiestMaskRework
                     c.Emit(OpCodes.Ldarg_1);
                     c.EmitDelegate<Action<CharacterBody, DamageReport>>((ghostBody, damageReport) =>
                     {
-                        damageReport.attacker.GetComponent<HappiestMaskBehavior>().ghosts.Add(ghostBody);
+                        if (ghostBody != null)
+                        {
+                            damageReport.attacker.GetComponent<HappiestMaskBehavior>().SetGhost(ghostBody);
+                            ghostBody.master.inventory.GiveItem(RoR2Content.Items.BoostDamage, 150 * (damageReport.attackerBody.inventory.GetItemCount(RoR2Content.Items.GhostOnKill) - 1));
+                        }   
                     });
-                    this.UpdateText();
                 };
+                this.UpdateText();
             }
             catch (Exception e)
             {
@@ -107,9 +94,9 @@ namespace HappiestMaskRework
         }
         private void UpdateText()
         {
-            this.ReplaceString("ITEM_GHOSTONKILL_DESC", "Killing an enemy will spawn a ghost of the killed enemy with <style=cIsDamage>1500%</style> damage for <style=cIsDamage>30s</style>. "
-            + "You can have <style=cIsDamage>1</style> <style=cStack>(+1 per stack)</style> ghosts at a time.");
-            this.ReplaceString("ITEM_GHOSTONKILL_PICKUP", "Killing an enemy spawns a ghost of them.");
+            this.ReplaceString("ITEM_GHOSTONKILL_DESC", "Killing an enemy will spawn a ghost of the killed enemy with <style=cIsDamage>1500%</style>"
+                + "<style=cStack>(+1500% per stack)</style> damage for <style=cIsDamage>30s</style>. ");
+            this.ReplaceString("ITEM_GHOSTONKILL_PICKUP", "Killing an enemy spawns a friendly ghost of them.");
         }
 
 
@@ -118,10 +105,5 @@ namespace HappiestMaskRework
             this.DefaultLanguage[token] = Language.GetString(token);
             LanguageAPI.Add(token, newText);
         }
-
-        /*void NewPreSpawnSetup(CharacterMaster master)
-        {
-            master.inventory.RemoveItem(RoR2Content.Items.BoostDamage, 50);
-        }*/
     }
 }
