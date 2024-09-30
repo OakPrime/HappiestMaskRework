@@ -6,7 +6,6 @@ using RoR2;
 using R2API;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace HappiestMaskRework
 {
@@ -26,7 +25,7 @@ namespace HappiestMaskRework
         public const string PluginGUID = PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "OakPrime";
         public const string PluginName = "HappiestMaskRework";
-        public const string PluginVersion = "1.1.0";
+        public const string PluginVersion = "1.2.0";
 
         private readonly Dictionary<string, string> DefaultLanguage = new Dictionary<string, string>();
 
@@ -81,7 +80,7 @@ namespace HappiestMaskRework
                         if (ghostBody != null)
                         {
                             damageReport.attacker.GetComponent<HappiestMaskBehavior>().SetGhost(ghostBody);
-                            ghostBody.master.inventory.GiveItem(RoR2Content.Items.BoostDamage, 150 * (damageReport.attackerBody.inventory.GetItemCount(RoR2Content.Items.GhostOnKill) - 1));
+                            ghostBody.master.inventory.GiveItem(RoR2Content.Items.BoostDamage, 75 * damageReport.attackerBody.inventory.GetItemCount(RoR2Content.Items.GhostOnKill) - 150);
                         }   
                     });
                 };
@@ -94,8 +93,8 @@ namespace HappiestMaskRework
         }
         private void UpdateText()
         {
-            this.ReplaceString("ITEM_GHOSTONKILL_DESC", "Killing an enemy will spawn a ghost of the killed enemy with <style=cIsDamage>1500%</style>"
-                + "<style=cStack>(+1500% per stack)</style> damage for <style=cIsDamage>30s</style>. ");
+            this.ReplaceString("ITEM_GHOSTONKILL_DESC", "Killing an enemy will spawn a ghost of the killed enemy with <style=cIsDamage>750%</style>"
+                + "<style=cStack>(+750% per stack)</style> damage for <style=cIsDamage>30s</style>. ");
             this.ReplaceString("ITEM_GHOSTONKILL_PICKUP", "Killing an enemy spawns a friendly ghost of them.");
         }
 
